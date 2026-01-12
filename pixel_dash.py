@@ -3,21 +3,19 @@ import random
 import math
 from pygame import Rect
 
-# GAME SETTINGS
-# All game settings are here for easy modification.
+# Configurações
 WIDTH = 800
 HEIGHT = 600
-TITLE = "Pixel Dash" # Nome do jogo alterado
+TITLE = "Pixel Dash"
 
-# Physics and gameplay parameters
+# Física e Gameplay
 GRAVITY = 0.6
 PLAYER_SPEED = 4
 JUMP_POWER = 12
 LEVEL_LENGTH = 8000
 TOTAL_COINS = 30
 
-# GLOBAL GAME STATE VARIABLES 
-# These variables control the current state of the game.
+# Variáveis Globais
 game_state = "tutorial"
 camera_x = 0
 music_on = True
@@ -28,7 +26,7 @@ coins = []
 level_blocks = []
 coin_animation_timer = 0
 
-# Dictionaries to organize enemies, making them easier to manage.
+# Listas de inimigos
 enemies = {
     "walkers": [],
     "flyers": [],
@@ -37,14 +35,13 @@ enemies = {
     "spikes": []
 }
 
-# PLAYER 
-# Initial setup for our hero
+# Player
 player = Actor("hero_idle_1", (150, 300))
-player.vy = 0  # Vertical velocity for jumps and falls
+player.vy = 0 
 player.on_ground = False
-player.jumps_left = 2  # Counter for the double jump mechanic
+player.jumps_left = 2 
 
-# Player sprite animations
+# Sprites
 player_frames = {
     "idle": ["hero_idle_1", "hero_idle_2"],
     "run": ["hero_idle_1", "hero_idle_2"],
@@ -53,23 +50,18 @@ player_frames = {
 player.animation_timer = 0
 player.frame_idx = 0
 
-# ANIMATED FINAL FLAG
-# The flag that marks the end of the level, with its simple animation.
+# Bandeira
 flag_actor = Actor("flag_1", (LEVEL_LENGTH - 300, 0))
 flag_frames = ["flag_1", "flag_2"]
 flag_timer = 0
 flag_frame_idx = 0
 
-# INTERFACE BUTTONS
-# A class for menu buttons, making them reusable.
+# Interface
 class Button:
-    # A Button class that only uses pygame.Rect, as allowed.
     def __init__(self, rect, text, action, scale=1.5):
         self.rect = rect
         self.text = text
         self.action = action
-        # The scale functionality is removed to comply with the rules.
-        # It's assumed the button sprite 'botao.png' is pre-scaled to the desired size.
         self.image = images.botao
         self.scaled_image = images.botao
 
@@ -82,7 +74,6 @@ class Button:
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
-# Instantiating the menu buttons
 start_button = Button(Rect(0, 0, 220, 50), "Start Game", "start")
 start_button.rect.center = (WIDTH // 2, HEIGHT // 2 - 100)
 quit_button = Button(Rect(0, 0, 220, 50), "Quit", "quit")
@@ -92,9 +83,8 @@ music_button.rect.center = (WIDTH // 2, HEIGHT // 2)
 sounds_button = Button(Rect(0, 0, 220, 50), "Sounds: ON", "sounds_toggle")
 sounds_button.rect.center = (WIDTH // 2, HEIGHT // 2 + 50)
 
-# GENERAL CONTROL FUNCTIONS
 def play_background_music():
-    """Plays the background music if enabled."""
+    # Toca música 
     global music_on
     if music_on:
         try:
@@ -104,12 +94,10 @@ def play_background_music():
             print("WARNING: Background music file not found.")
 
 def stop_background_music():
-    """Stops the background music."""
     global music_on
     music.stop()
 
 def reset_game():
-    """Resets all game state variables for a new game session."""
     global player, camera_x, score, all_coins_collected, coin_animation_timer
     score = 0
     player.image = "hero_idle_1"
@@ -121,7 +109,7 @@ def reset_game():
     all_coins_collected = False
     coin_animation_timer = 0
     
-    # Reload the level, enemies, and coins from scratch.
+    # Recria o nível do zero
     create_level_blocks()
     spawn_enemies()
     create_level_coins()
@@ -133,12 +121,12 @@ def ground_top_y():
     return HEIGHT - images.ground.get_height()
 
 def create_level_coins():
-    """Places all coins in predefined, logical positions."""
+    """Posiciona as moedas."""
     global coins
     coins.clear()
     ground_y = ground_top_y()
     
-    # Adding coins in sections for a more intentional design.
+    # Adicionando moedas por seções, elas não são geradas de modo aleatório
     coins.extend([
         Actor("coin_1", (400, ground_y - 120)), Actor("coin_1", (600, ground_y - 200)),
         Actor("coin_1", (1300, ground_y - 120)), Actor("coin_1", (1550, ground_y - 200)),
@@ -157,8 +145,9 @@ def create_level_coins():
         coins.append(Actor("coin_1", (7500 + i * 100, ground_y - 120)))
 
 def create_level_blocks():
-    """Defines the position of all blocks and spikes in the level.
-    The placement is manual to ensure all platforms are reachable.
+    """
+    Define posições de blocos e espinhos.
+    Layout manual para garantir pulos possíveis.
     """
     global level_blocks, enemies, flag_actor
     level_blocks.clear()
@@ -167,7 +156,7 @@ def create_level_blocks():
     ground_y = ground_top_y()
     spike_height = images.enemy_spike.get_height()
     
-    # Section 1: Start and warm-up
+
     block_x = 400
     ground_width = images.ground.get_width()
     for i in range(5):
@@ -175,7 +164,7 @@ def create_level_blocks():
     enemies["spikes"].append(Actor("enemy_spike", (block_x + 3 * ground_width, ground_y - spike_height / 2)))
     level_blocks.append(Actor("platform_small", (block_x + 6 * ground_width, ground_y - 50)))
 
-    # Section 2: Platform climb
+
     climb_x = 1200
     level_blocks.extend([
         Actor("platform_large", (climb_x, ground_y - 100)),
@@ -185,7 +174,7 @@ def create_level_blocks():
     ])
     enemies["spikes"].append(Actor("enemy_spike", (climb_x + 250, ground_y - 180 - spike_height / 2)))
 
-    # Section 3: Abyss
+
     abyss_y = ground_y - 150
     level_blocks.extend([
         Actor("platform_small", (2400, abyss_y)),
@@ -194,7 +183,7 @@ def create_level_blocks():
         Actor("platform_medium", (3300, abyss_y - 50))
     ])
 
-    # Section 4: Block bridge
+
     bridge_x = 3600
     bridge_y = ground_y - 100
     for i in range(8):
@@ -205,7 +194,7 @@ def create_level_blocks():
         Actor("enemy_spike", (bridge_x + 650, ground_y - spike_height / 2))
     ])
 
-    # Section 5: Elevated platforms
+
     elevate_x = 5600
     level_blocks.extend([
         Actor("platform_large", (elevate_x, ground_y - 150)),
@@ -214,7 +203,7 @@ def create_level_blocks():
     ])
     enemies["spikes"].append(Actor("enemy_spike", (elevate_x + 100, ground_y - spike_height / 2)))
 
-    # Section 6: Spikes challenge
+
     final_x = 7000
     level_blocks.extend([
         Actor("platform_small", (final_x - 300, ground_y - 100)),
@@ -234,7 +223,7 @@ def create_level_blocks():
     flag_actor.pos = (final_block.x, final_block.y - final_block.height / 2 - flag_actor.height / 2)
 
 def spawn_enemies():
-    """Creates and positions all enemies for the start of the level."""
+    """Cria e posiciona os inimigos."""
     global enemies
     enemies["walkers"].clear(); enemies["flyers"].clear(); enemies["jumpers"].clear(); enemies["swoopers"].clear()
 
@@ -260,15 +249,14 @@ def spawn_enemies():
     ])
 
 
-# GAME LOGIC AND UPDATE FUNCTIONS
+# --- Lógica do Jogo ---
 def update():
-    """Main game update function, called 60 times per second."""
     global game_state, camera_x, all_coins_collected, score
     
     if game_state != "playing":
         return
 
-    # --- Player logic ---
+    # Movimento do personagem
     moving = False
     if keyboard.a or keyboard.left:
         player.x -= PLAYER_SPEED
@@ -321,7 +309,7 @@ def update():
                 print("WARNING: 'victory.wav' sound file not found!")
 
 def check_collisions():
-    """Checks for all player collisions with blocks, enemies, and coins."""
+    """Verifica colisões com blocos, inimigos e moedas."""
     global score, player
     
     for block in level_blocks:
@@ -361,10 +349,9 @@ def check_collisions():
                     print("WARNING: 'coin_sound.wav' sound file not found!")
 
 def update_all_enemies():
-    """Updates the position and animation of all enemies."""
     global flag_timer, flag_frame_idx, enemies
     
-    # Update walkers
+    # Atualiza os inimigos
     for w in enemies["walkers"]:
         w["actor"].x += w["dir"] * 1.4
         if w["actor"].x < w["left"] or w["actor"].x > w["right"]:
@@ -374,7 +361,7 @@ def update_all_enemies():
             w["frame_idx"] = (w["frame_idx"] + 1) % len(w["frames"])
             w["actor"].image = w["frames"][w["frame_idx"]]
     
-    # Update flyers
+
     for f in enemies["flyers"]:
         f["actor"].x += f["dir"] * f["speed"]
         if f["actor"].x < f["left"] or f["actor"].x > f["right"]:
@@ -384,7 +371,7 @@ def update_all_enemies():
             f["frame_idx"] = (f["frame_idx"] + 1) % len(f["frames"])
             f["actor"].image = f["frames"][f["frame_idx"]]
     
-    # Update jumpers
+
     for j in enemies["jumpers"]:
         actor = j["actor"]
         if j["pause_timer"] > 0:
@@ -405,7 +392,7 @@ def update_all_enemies():
                     j["pause_timer"] = 60
         actor.x += 1
         
-    # Update swoopers (with sinusoidal movement)
+
     for s in enemies["swoopers"]:
         actor = s["actor"]
         actor.x += s["speed"] * s["dir"]
@@ -415,16 +402,16 @@ def update_all_enemies():
             s["frame_idx"] = (s["frame_idx"] + 1) % len(s["frames"])
             actor.image = s["frames"][s["frame_idx"]]
             
-    # Animate the final flag
+    # Animação da bandeira
     flag_timer = (flag_timer + 1) % 15
     if flag_timer == 0:
         flag_frame_idx = (flag_frame_idx + 1) % len(flag_frames)
         flag_actor.image = flag_frames[flag_frame_idx]
 
 def hit_any_lethal_enemy():
-    """Checks if the player has a lethal collision.
-    Only spikes are unconditionally lethal. Other enemy collisions are lethal
-    only if they are not stomps.
+    """
+    Verifica se o player morreu.
+    Espinhos matam sempre. Inimigos matam se não for 'stomp' (pulo na cabeça).
     """
     global enemies, player
     for spike in enemies["spikes"]:
@@ -441,7 +428,6 @@ def hit_any_lethal_enemy():
     return False
 
 def animate_coins():
-    """Handles the animation logic for all coins."""
     global coin_animation_timer, coins
     coin_animation_timer += 1
     if coin_animation_timer >= 10:
@@ -452,9 +438,7 @@ def animate_coins():
                 coin.image = "coin_2" if current_frame == "coin_1" else "coin_1"
 
 
-# DRAWING FUNCTIONS
 def draw():
-    """Main game drawing function."""
     if game_state == "tutorial":
         draw_tutorial()
     elif game_state == "menu":
@@ -467,7 +451,7 @@ def draw():
         draw_complete()
 
 def draw_background():
-    """Draws the background with a parallax effect."""
+    # Efeito parallax simples
     try:
         bg = images.background_game
         bw = bg.get_width()
@@ -478,7 +462,7 @@ def draw_background():
         screen.fill((135, 206, 235))
 
 def draw_ground():
-    """Draws the infinite scrolling ground."""
+    # Chão infinito
     tile = images.ground
     tw = tile.get_width()
     y = ground_top_y()
@@ -488,7 +472,6 @@ def draw_ground():
         screen.blit("ground", (i * tw - camera_x, y))
 
 def draw_game():
-    """Draws all game elements to the screen."""
     draw_background()
     draw_ground()
     
@@ -510,7 +493,6 @@ def draw_game():
                      color="white", fontname="vcr_osd_mono", fontsize=30)
 
 def draw_tutorial():
-    """Draws the tutorial screen."""
     draw_background()
     screen.draw.text("Bem-vindo ao Pixel Dash!", center=(WIDTH // 2, HEIGHT // 2 - 150),
                      fontsize=32, color="white", fontname="vcr_osd_mono")
@@ -528,7 +510,6 @@ def draw_tutorial():
                      fontsize=28, color="red", fontname="vcr_osd_mono")
 
 def draw_menu():
-    """Draws the main menu screen."""
     draw_background()
     draw_ground()
     start_button.draw()
@@ -539,7 +520,6 @@ def draw_menu():
     sounds_button.draw()
 
 def draw_game_over():
-    """Draws the 'Game Over' screen."""
     draw_background()
     draw_ground()
     screen.draw.text("GAME OVER", center=(WIDTH // 2, HEIGHT // 2 - 60),
@@ -548,7 +528,6 @@ def draw_game_over():
                      fontsize=36, color="white", fontname="vcr_osd_mono")
 
 def draw_complete():
-    """Draws the 'Level Complete' screen."""
     draw_background()
     draw_ground()
     if all_coins_collected:
@@ -565,7 +544,6 @@ def draw_complete():
                          fontsize=40, color="yellow", fontname="vcr_osd_mono")
 
 def on_key_down(key):
-    """Handles keyboard events."""
     global game_state
     if game_state == "tutorial":
         game_state = "menu"
@@ -585,7 +563,6 @@ def on_key_down(key):
                 print("WARNING: 'jump.wav' sound file not found!")
 
 def on_mouse_down(pos):
-    """Handles mouse click events."""
     global game_state, music_on, sounds_on
     if game_state == "menu":
         if start_button.is_clicked(pos):
