@@ -76,7 +76,14 @@ Caso algum arquivo de áudio não seja encontrado, o jogo continua funcionando n
 
 ## ▶️ Como Executar
 
-1. Instale o Python 3.x  
-2. Instale o Pygame Zero:
-   ```bash
-   pip install pgzero
+```bash
+# 1. Clone o repositório
+git clone https://github.com/ruancarlosms/game_pixel_dash.git
+
+# 2. Acesse a pasta do projeto
+
+# 3. Instale a biblioteca necessária
+pip install pgzero
+
+# 4. Inicie o jogo
+pgzrun pixel_dash.py
