@@ -55,16 +55,6 @@ Pixel Dash é um jogo de plataforma 2D desenvolvido em Python utilizando a bibli
 
 ---
 
-## 🧩 Estados do Jogo
-
-- **Tutorial**
-- **Menu**
-- **Playing**
-- **Game Over**
-- **Complete (Nível Concluído)**
-
----
-
 ## 🔊 Áudio
 
 O jogo possui:
